@@ -22,27 +22,25 @@ run_cmd parse_str "∀ n : nat, n = n" >>= tactic.trace
 
 /-- Attempts to parse a string representing a theorem, i.e., a sequence of arguments followed by a type,
     separated by a term. -/
-meta def parse_thm_str_core : string.iterator → state_t (nat × string) tactic expr := 
+meta def parse_thm_str_core : string.iterator → state_t nat tactic expr := 
 λ σ, do
-  state ← get,
-  let n := state.fst, let args := state.snd,
+  n ← get,
   let c := σ.curr,
 
   if n = nat.zero ∧ c = ':' then do state_t.lift $
-    parse_str $ sformat! "Π {args},{σ.next.next_to_string}"
+    parse_str $ sformat! "Π {σ.prev_to_string},{σ.next.next_to_string}"
   else do
-    let n' : nat := 
+    put $
       if c ∈ ['(', '[', '{', '⦃'] then
         n.succ
       else if c ∈ [')', ']', '}', '⦄'] then
         n-1
       else
         n,
-    put (n', args.push c),
     pure σ.next >>= parse_thm_str_core
 
 meta def parse_thm_str (s : string) : tactic expr :=
-  (parse_thm_str_core s.mk_iterator).run (nat.zero, "") >>= return ∘ prod.fst
+  (parse_thm_str_core s.mk_iterator).run nat.zero >>= return ∘ prod.fst
 
 run_cmd parse_thm_str "{T : Type*} (n : nat) (m : ℤ) : ↑n > m" >>= tactic.trace
 
