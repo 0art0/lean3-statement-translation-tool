@@ -36,5 +36,5 @@ meta def process_translations (stmt : string)
   (typecorrect_translations, failed_translations) ← translations'.split_with $ 
       (functor.map option.is_some) ∘ tactic.try_core ∘ parse_thm_str,
   let format_completion := λ completion : string, 
-      sformat! "/-- {stmt} -/ {completion_prefix}{completion}",
+      sformat! "/-- {stmt} -/ \n {completion_prefix}{completion}",
   return (typecorrect_translations.map format_completion, failed_translations.map format_completion)

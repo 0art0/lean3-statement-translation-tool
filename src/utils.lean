@@ -56,7 +56,7 @@ meta def parse_thm_str_core : string.iterator → state nat string := λ σ, do
       pure σ.to_string
 
 meta def parse_thm_str (s : string) : tactic expr :=
-  let s' := s.drop_while (λ c, c ≠ ' ') in
+  let s' := s.pop.drop_while (λ c, c ≠ ' ') in
     parse_str $ prod.fst $ (parse_thm_str_core s'.mk_iterator).run nat.zero
 
 run_cmd parse_thm_str "test {T : Type*} (n : nat) (m : ℤ) : ↑n > m" >>= tactic.trace

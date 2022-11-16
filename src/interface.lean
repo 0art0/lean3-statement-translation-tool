@@ -14,7 +14,9 @@ meta def translate_help (_ : parse $ tk "translate?") : lean.parser unit := do
   let s := to_string stmt,
   trace sformat!"To start translating the sentence {s} into a Lean theorem," pure (),
   suggest_string $ "translate! " ++ s,
-  trace sformat!"\nTo start translating the sentence {s} into a Lean theorem with a docstring," pure (),
+  trace sformat!"To start translating the sentence {s} into a Lean theorem using Lean Chat prompts (not implemented)," pure (),
+  suggest_string $ "translate@ " ++ s,
+  trace sformat!"\nTo start translating the sentence {s} into a Lean definition (not implemented)," pure (),
   suggest_string $ "translate/ " ++ s
 
 /--!
@@ -28,9 +30,9 @@ meta def translate_cmd (_ : parse $ tk "translate!") : lean.parser unit := do
   let stmt := to_string s,
   let stmt := stmt.pop_back.pop,
   (typecorrect_translations, failed_translations) ← process_translations stmt,
-  tactic.trace "Type-correct translations:\n",
+  tactic.trace "\nType-correct translations:\n",
   suggest_strings $ typecorrect_translations,
-  tactic.trace "\nFailed translations:\n",
+  tactic.trace "Failed translations:\n",
   suggest_strings $ failed_translations
 
 /--!
