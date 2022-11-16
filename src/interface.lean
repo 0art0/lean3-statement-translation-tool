@@ -14,7 +14,7 @@ meta def translate_cmd (_ : parse $ tk "#translate ") : lean.parser unit := do
   trace sformat!"Translating {stmt} to Lean code ...\n" pure (),
   -- is there a safer way of operating within the `lean.parser` monad?
   translations ← tactic.unsafe_run_io $ get_translations stmt,
-  suggest_strings translations
+  suggest_strings $ translations
 
 /--!
 Translates a statement to Lean code **with documentation** automatically using OpenAI Codex.
@@ -28,7 +28,7 @@ meta def translate_with_docstring_cmd (_ : parse $ tk "#translate/") : lean.pars
   trace sformat!"Translating {stmt} to Lean code ...\n" pure (),
   -- is there a safer way of operating within the `lean.parser` monad?
   translations ← tactic.unsafe_run_io $ get_translations stmt,
-  suggest_strings $ translations.map (λ t, sformat!"/-- {stmt} -/\n{t} :=\n  sorry")
+  suggest_strings $ translations.map (λ t, sformat!"/-- {stmt} -/ {t} :=\n  sorry")
 
 /--!
 Provides an interface to the `#translate ` and `#translate/` commands for automatic translation of mathematical statements to Lean code.

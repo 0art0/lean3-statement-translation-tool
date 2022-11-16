@@ -32,8 +32,8 @@ section completion_request
 structure completion_request : Type :=
   (prompt : string)
   (model : string := "code-davinci-002")
-  (temperature : nat := 8) -- the actual temperature times `10`
-  (n : nat := 1)
+  (temperature : nat := 2) -- the actual temperature times `10`
+  (n : nat := 3)
   (max_tokens : int := 150)
   (stop : list string := [":=", "/-", "-/"])
   
@@ -91,7 +91,7 @@ section similarity_prompts
 /-- Query the `LeanAide` server to get `mathlib` theorems similar to a given statement. -/
 meta def get_similarity_prompts (s : string) (n : nat := 15) : io (list json) := do
   let data := json.object [
-    ("filename", "data/safe_prompts.json"),
+    ("filename", "data/prompts.json"),
     ("field", "doc_string"),
     ("doc_string", s),
     ("n", n),
