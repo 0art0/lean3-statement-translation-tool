@@ -1,6 +1,6 @@
 import system.io
 
-set_option pp.colors true
+-- set_option pp.colors true
 
 /-- Displays the input string in the Lean infoview with a "Try this: ..." message.
     Clicking on the suggestion pastes it into the editor. -/
@@ -15,22 +15,6 @@ run_cmd suggest_string "hello world" format.color.green
 meta def suggest_strings {m : Type* → Type*} [monad m] (l : list string) : m unit :=
   l.mmap suggest_string >>= λ _, pure ()
 
-namespace tactic
-
-open interaction_monad.result
-
-meta def try' {α} (t : tactic α) : tactic (except format α) := λ s,
-  match t s with
-    | (success a s') := success (except.ok a) s'
-    | (exception none _ _) := success (except.error $ format.nil) s
-    | (exception (some f) _ _) := success (except.error $ f ()) s
-  end
-
-meta def display {α} [has_to_string α] (t : tactic α) : tactic string := λ s, 
-  success (to_string (t s)) s
-
-end tactic
-
 /-- Attempts to parse a string representing a type as an expression. -/
 meta def parse_str (s : string) : tactic expr :=
   lean.parser.run $
@@ -39,8 +23,19 @@ meta def parse_str (s : string) : tactic expr :=
 
 run_cmd parse_str "∀ n : nat, n + n = n" >>= tactic.trace
 
-/-- Attempts to parse a string representing a theorem, i.e., a sequence of arguments followed by a type,
-    separated by a colon. -/
+namespace string
+
+def pop : string → string := λ s, s.mk_iterator.next.next_to_string
+
+def drop_while : (char → bool) → string → string
+  | _ "" := ""
+  | p ⟨c::cs⟩ :=
+      if p c then drop_while p ⟨cs⟩ else ⟨cs⟩
+
+end string
+
+/-- Attempts to parse a string representing a theorem, i.e., a name, followed by a 
+  sequence of arguments followed by a type which is separated by a colon. -/
 meta def parse_thm_str_core : string.iterator → state nat string := λ σ, do
   n ← get,
   let c := σ.curr,
@@ -61,9 +56,10 @@ meta def parse_thm_str_core : string.iterator → state nat string := λ σ, do
       pure σ.to_string
 
 meta def parse_thm_str (s : string) : tactic expr :=
-  parse_str $ prod.fst $ (parse_thm_str_core s.mk_iterator).run nat.zero
+  let s' := s.drop_while (λ c, c ≠ ' ') in
+    parse_str $ prod.fst $ (parse_thm_str_core s'.mk_iterator).run nat.zero
 
-run_cmd parse_thm_str "{T : Type*} (n : nat) (m : ℤ) : ↑n > m" >>= tactic.trace
+run_cmd parse_thm_str "test {T : Type*} (n : nat) (m : ℤ) : ↑n > m" >>= tactic.trace
 
 
 namespace list

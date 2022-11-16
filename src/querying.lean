@@ -32,8 +32,8 @@ section completion_request
 structure completion_request : Type :=
   (prompt : string)
   (model : string := "code-davinci-002")
-  (temperature : nat := 2) -- the actual temperature times `10`
-  (n : nat := 3)
+  (temperature : nat := 6) -- the actual temperature times `10`
+  (n : nat := 7)
   (max_tokens : int := 150)
   (stop : list string := [":=", "/-", "-/"])
   

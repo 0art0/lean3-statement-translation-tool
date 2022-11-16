@@ -30,6 +30,7 @@ meta def module_decls : tactic (list declaration_with_docstring) := do
   mod_docs ← tactic.module_doc_strings,
   -- keep only docstrings corresponding to declarations
   let mod_docs' := mod_docs.filter_map prod.fst,
+  tactic.trace sformat! "Theorems from current scope: {mod_docs'}",
   mod_docs'.mmap from_name
 
 /-- Checks whether a declaration is type-correct. -/

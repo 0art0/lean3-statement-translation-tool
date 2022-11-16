@@ -31,12 +31,10 @@ meta def get_translations (stmt : string)
 meta def process_translations (stmt : string)
     (n_sim := 15) (completion_prefix := "theorem") : tactic (list string × list string) := do
   tactic.trace sformat!"Translating {stmt} to Lean code ...\n",
-  
   translations ← tactic.unsafe_run_io $ get_translations stmt n_sim completion_prefix,
   let translations' := translations.erase_dups,
   (typecorrect_translations, failed_translations) ← translations'.split_with $ 
       (functor.map option.is_some) ∘ tactic.try_core ∘ parse_thm_str,
-  
-  let typecorrect_translations' := typecorrect_translations.map $ λ t, completion_prefix ++ t,
-  let failed_translations' := failed_translations.map $ λ t, completion_prefix ++ t,
-  return (typecorrect_translations', failed_translations')
+  let format_completion := λ completion : string, 
+      sformat! "/-- {stmt} -/ {completion_prefix}{completion}",
+  return (typecorrect_translations.map format_completion, failed_translations.map format_completion)
