@@ -12,23 +12,38 @@ run_cmd suggest_string "hello world"
 meta def suggest_strings {m : Type* → Type*} [monad m] (l : list string) : m unit :=
   l.mmap suggest_string >>= λ _, pure ()
 
+namespace tactic
+
+open interaction_monad.result
+
+meta def try' {α} (t : tactic α) : tactic (except format α) := λ s,
+  match t s with
+    | (success a s') := success (except.ok a) s'
+    | (exception none _ _) := success (except.error $ format.nil) s
+    | (exception (some f) _ _) := success (except.error $ f ()) s
+  end
+
+meta def display {α} [has_to_string α] (t : tactic α) : tactic string := λ s, 
+  success (to_string (t s)) s
+
+end tactic
+
 /-- Attempts to parse a string representing a type as an expression. -/
 meta def parse_str (s : string) : tactic expr :=
   lean.parser.run $
     lean.parser.with_input interactive.types.texpr s >>=
       λ x, tactic.to_expr x.fst
 
-run_cmd parse_str "∀ n : nat, n = n" >>= tactic.trace
+run_cmd parse_str "∀ n : nat, n + n = n" >>= tactic.trace
 
 /-- Attempts to parse a string representing a theorem, i.e., a sequence of arguments followed by a type,
-    separated by a term. -/
-meta def parse_thm_str_core : string.iterator → state_t nat tactic expr := 
-λ σ, do
+    separated by a colon. -/
+meta def parse_thm_str_core : string.iterator → state nat string := λ σ, do
   n ← get,
   let c := σ.curr,
 
-  if n = nat.zero ∧ c = ':' then do state_t.lift $
-    parse_str $ sformat! "Π {σ.prev_to_string},{σ.next.next_to_string}"
+  if n = nat.zero ∧ c = ':' then
+    pure sformat! "Π {σ.prev_to_string},{σ.next.next_to_string}"
   else do
     put $
       if c ∈ ['(', '[', '{', '⦃'] then
@@ -37,12 +52,16 @@ meta def parse_thm_str_core : string.iterator → state_t nat tactic expr :=
         n-1
       else
         n,
-    pure σ.next >>= parse_thm_str_core
+    if σ.has_next then
+      pure σ.next >>= parse_thm_str_core
+    else
+      pure σ.to_string
 
 meta def parse_thm_str (s : string) : tactic expr :=
-  (parse_thm_str_core s.mk_iterator).run nat.zero >>= return ∘ prod.fst
+  parse_str $ prod.fst $ (parse_thm_str_core s.mk_iterator).run nat.zero
 
 run_cmd parse_thm_str "{T : Type*} (n : nat) (m : ℤ) : ↑n > m" >>= tactic.trace
+
 
 namespace list
 
@@ -50,8 +69,15 @@ def lookup_prod {α β} : list (α × β) → (α → bool) → option β
   | [] _ := none
   | (⟨a, b⟩ :: xs) p := if p a then some b else xs.lookup_prod p
 
-def erase_dups {α} : list α → list α := sorry
+def erase_dups_aux {α} [decidable_eq α] : list α → list α → list α
+  | l [] := l
+  | l (a :: l') := erase_dups_aux (if a ∈ l then l else (a::l)) l'
 
+def erase_dups_rev {α} [decidable_eq α] : list α → list α :=
+  erase_dups_aux []
+
+def erase_dups {α} [decidable_eq α] : list α → list α :=
+  reverse ∘ erase_dups_rev
 
 end list
 
