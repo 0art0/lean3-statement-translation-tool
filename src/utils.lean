@@ -1,12 +1,15 @@
 import system.io
 
+set_option pp.colors true
+
 /-- Displays the input string in the Lean infoview with a "Try this: ..." message.
     Clicking on the suggestion pastes it into the editor. -/
-meta def suggest_string {m : Type* → Type*} [monad m] (s : string) : m unit :=
-    let f := to_fmt sformat!"Try this: {s}\n" in
-      pure $ _root_.trace_fmt f (λ _, ())
+meta def suggest_string {m : Type* → Type*} [monad m] 
+    (s : string) (color : format.color := format.color.blue) : m unit :=
+  let f := to_fmt sformat!"Try this: {s}\n" in
+    pure $ _root_.trace_fmt (f.highlight color) (λ _, ())
 
-run_cmd suggest_string "hello world"
+run_cmd suggest_string "hello world" format.color.green
 
 /-- A version of `suggest_string` that handles multiple strings. -/
 meta def suggest_strings {m : Type* → Type*} [monad m] (l : list string) : m unit :=
@@ -78,6 +81,16 @@ def erase_dups_rev {α} [decidable_eq α] : list α → list α :=
 
 def erase_dups {α} [decidable_eq α] : list α → list α :=
   reverse ∘ erase_dups_rev
+
+meta def split_with {m : Type* → Type*} {α} [monad m] : (α → m bool) → list α → m (list α × list α)
+  | _ [] := return ([], [])
+  | φ (a::l) := do
+    v ← φ a,
+    (successes, failures) ← split_with φ l,
+    match v with
+      | tt := return (a :: successes, failures)
+      | ff := return (successes, a :: failures)
+    end
 
 end list
 
