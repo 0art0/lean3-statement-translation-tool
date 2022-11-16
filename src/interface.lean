@@ -26,10 +26,12 @@ This command is not meant to be used directly, but rather through the `translate
 meta def translate_cmd (_ : parse $ tk "translate!") : lean.parser unit := do
   s ← lean.parser.pexpr,
   let stmt := to_string s,
-  trace sformat!"Translating {stmt} to Lean code ...\n" pure (),
-  -- is there a safer way of operating within the `lean.parser` monad?
-  translations ← tactic.unsafe_run_io $ get_translations stmt,
-  suggest_strings $ translations
+  let stmt := stmt.pop_back.pop,
+  (typecorrect_translations, failed_translations) ← process_translations stmt,
+  tactic.trace "Type-correct translations:\n",
+  suggest_strings $ typecorrect_translations,
+  tactic.trace "\nFailed translations:\n",
+  suggest_strings $ failed_translations
 
 /--!
 Translates a statement to Lean code **with documentation** automatically using OpenAI Codex.
