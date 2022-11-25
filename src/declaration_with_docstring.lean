@@ -67,9 +67,9 @@ meta def from_json (j : json) : except string declaration_with_docstring := do
     as a `declaration_with_docstring`. -/
 def from_string (decl : string) (doc_str := "") : declaration_with_docstring :=
   let decl := decl.drop_while $ λ c, c.is_whitespace in
-  let (decl_head, named_term) := decl.take_until $ λ c, ¬c.is_alphanum in
+  let (decl_head, named_term) := decl.take_until $ λ c, (c.is_whitespace ∨ c = ',' ∨ c = ':' ∨ c = ';' ∨ c = '-') in
   let named_term := named_term.drop_while $ λ c, c.is_whitespace in
-  let (decl_name, args_with_type) := named_term.take_until $ λ c, ¬c.is_alphanum in
+  let (decl_name, args_with_type) := named_term.take_until $ λ c, (c.is_whitespace ∨ c = ',' ∨ c = ':' ∨ c = ';' ∨ c = '-') in
   let (args, type) := process_args args_with_type in
   { is_definition := decl_head = "def", 
     decl_name := decl_name, 
