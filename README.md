@@ -25,8 +25,6 @@ export LEANAIDE_IP="34.100.184.111:5000"
 export OPENAI_API_KEY=<your-open-ai-key>
 ```
 
-This step is needed only once.
-
 Clone this repository and open `src/experiments.lean` in VS Code or any other editor for Lean3. 
 
 To translate a statement, such as "Every natural number can be written as the sum of four squares", to Lean code, first type
