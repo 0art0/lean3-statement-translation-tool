@@ -9,7 +9,7 @@ meta def suggest_string {m : Type* → Type*} [monad m]
   let f := to_fmt sformat!"Try this: {s}\n" in
     pure $ _root_.trace_fmt (f.highlight color) (λ _, ())
 
-run_cmd suggest_string "hello world" format.color.green
+-- run_cmd suggest_string "hello world"
 
 /-- A version of `suggest_string` that handles multiple strings. -/
 meta def suggest_strings {m : Type* → Type*} [monad m] (l : list string) : m unit :=
@@ -21,11 +21,20 @@ meta def parse_str (s : string) : tactic expr :=
     lean.parser.with_input interactive.types.texpr s >>=
       λ x, tactic.to_expr x.fst
 
-run_cmd parse_str "∀ n : nat, n + n = n" >>= tactic.trace
+-- run_cmd parse_str "∀ n : nat, n + n = n" >>= tactic.traces
 
 namespace string
 
 def pop : string → string := λ s, s.mk_iterator.next.next_to_string
+
+def take_until_aux : (char → bool) → string → string → string × string
+  | p ⟨c::cs⟩ acc :=
+    let acc' := acc.push c in 
+      if p c then (⟨cs⟩, acc') else take_until_aux p ⟨cs⟩ acc'
+  | p ⟨[]⟩ acc := (⟨[]⟩, acc)
+
+def take_until : (char → bool) → string → string × string :=
+  λ p s, take_until_aux p s ""
 
 def drop_while : (char → bool) → string → string
   | _ "" := ""
@@ -34,33 +43,24 @@ def drop_while : (char → bool) → string → string
 
 end string
 
-/-- Attempts to parse a string representing a theorem, i.e., a name, followed by a 
-  sequence of arguments followed by a type which is separated by a colon. -/
-meta def parse_thm_str_core : string.iterator → state nat string := λ σ, do
-  n ← get,
-  let c := σ.curr,
-
-  if n = nat.zero ∧ c = ':' then
-    pure sformat! "Π {σ.prev_to_string},{σ.next.next_to_string}"
-  else do
-    put $
-      if c ∈ ['(', '[', '{', '⦃'] then
-        n.succ
-      else if c ∈ [')', ']', '}', '⦄'] then
-        n-1
-      else
-        n,
-    if σ.has_next then
-      pure σ.next >>= parse_thm_str_core
+/-- Attempts to process a string representing a type declaration, i.e., a 
+  sequence of arguments followed by a type, separated by a colon. -/
+def process_args_core : string → string → nat → (string × string)
+  | ⟨c::cs⟩ acc n :=
+    -- if all brackets are matched and the character is a colon
+    if n = nat.zero ∧ c = ':' then
+      (acc, ⟨cs⟩)
     else
-      pure σ.to_string
-
-meta def parse_thm_str (s : string) : tactic expr :=
-  let s' := s.pop.drop_while (λ c, c ≠ ' ') in
-    parse_str $ prod.fst $ (parse_thm_str_core s'.mk_iterator).run nat.zero
-
-run_cmd parse_thm_str "test {T : Type*} (n : nat) (m : ℤ) : ↑n > m" >>= tactic.trace
-
+      -- the number of left brackets minus the number of right brackets
+      let n' :=
+        (if c ∈ ['(', '[', '{', '⦃'] then
+          n.succ
+        else if c ∈ [')', ']', '}', '⦄'] then
+          n-1
+        else
+          n) in
+      process_args_core ⟨cs⟩ (acc.push c) n'
+    | ⟨[]⟩ acc n := (acc, ⟨[]⟩)
 
 namespace list
 
