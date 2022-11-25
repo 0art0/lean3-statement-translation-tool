@@ -27,7 +27,7 @@ export OPENAI_API_KEY=<your-open-ai-key>
 
 Clone this repository and open `src/experiments.lean` in VS Code or any other editor for Lean3. 
 
-To translate a statement, such as "Every natural number can be written as the sum of four squares", to Lean code, first type
+To translate a statement - such as "Every natural number can be written as the sum of four squares" - to Lean code, first type
 
 ```lean
 translate? "Every natural number can be written as the sum of four squares"
@@ -41,7 +41,7 @@ To add this as a dependency to your own repository, it should suffice to add
 lean3_statement_translation_tool = {git = "https://github.com/0art0/lean3_statement_translation_tool", rev = <the latest revision of the repository on GitHub>}
 ```
 
-Then any file importing `interface.lean` should be able to run the translation tool as demonstrated above.
+to the `leanpkg.toml` file of your repository. Then any file importing `interface.lean` should be able to run the translation tool as demonstrated above.
 
 The above instructions should work for a normal use. Details for configuring a local set-up of the server are described in the [`README` of the `LeanAide` repository](https://github.com/siddhartha-gadgil/LeanAide/blob/main/README.md).
 
