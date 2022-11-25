@@ -10,7 +10,7 @@ This is a part of [`LeanAide`](https://github.com/siddhartha-gadgil/LeanAide), w
 
 The tool works best on short and self-contained theorem statements, similar to the theorem doc-strings in `mathlib`. The translation is done using *input-dependent prompting*: when the user supplies a statement to be translated, related doc-strings from `mathlib` are automatically picked up and supplied to the Codex model in the form of a "prompt".
 
-Codex outputs a few possible translations of the input statement, which are then checked for type-correctness. Lean is a dependently-typed language, so type-checking a translation provides a strong *filter* for correctness. Moreover, as Lean exposes its internals to the user, this part can be done programmatically and efficiently from within Lean.
+Codex outputs a few possible translations of the input statement, which are then checked for type-correctness. Lean is a dependently-typed language, so type-checking a translation provides a strong *filter* for correctness. Moreover, as Lean exposes its internals to the user, this part can be done programmatically and efficiently from within Lean. Note that for the filtering to work as intended, the relevant imports must already be present in the file.
 
 In [our experiments](https://mathai2022.github.io/papers/17.pdf), we found that Codex with these modifications is able to successfully translate short docstring-like statements at the undergraduate level more than half the time.
 
@@ -42,6 +42,8 @@ To add this as a dependency to your own repository, it should suffice to add
 ```lean
 lean3_statement_translation_tool = {git = "https://github.com/0art0/lean3_statement_translation_tool", rev = <the latest revision of the repository on GitHub>}
 ```
+
+Then any file importing `interface.lean` should be able to run the translation tool as demonstrated above.
 
 The above instructions should work for a normal use. Details for configuring a local set-up of the server are described in the [`README` of the `LeanAide` repository](https://github.com/siddhartha-gadgil/LeanAide/blob/main/README.md).
 
