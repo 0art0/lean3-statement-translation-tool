@@ -52,7 +52,7 @@ def to_string : declaration_with_docstring → string
 
 /-- Displays a declaration and its docstring as a string. -/
 def to_full_string : declaration_with_docstring → string
-  | d := sformat!"/-- {d.doc_string} -/\n{d.to_string}"
+  | d := sformat!"/-- {d.doc_string} -/ \n {d.to_string}"
 
 /-- The json input is assumed to be an object with all the relevant fields. -/
 meta def from_json (j : json) : except string declaration_with_docstring := do
