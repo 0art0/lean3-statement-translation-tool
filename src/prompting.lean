@@ -25,16 +25,14 @@ meta def get_translations (stmt : string)
   -- io.print main_prompt,
   io.print_ln "Querying Codex ...",
   translations ← completion_request.get_codex_completions main_prompt,
-  return $ translations -- .map (λ t, prompt_suffix ++ t)
+  return $ translations.map (λ t, prompt_suffix ++ t)
 
 /-- Post-process the Codex completions by typechecking and adding the completion prefix. -/
 meta def process_translations (stmt : string)
-    (n_sim := 15) (completion_prefix := "theorem") : tactic (list string × list string) := do
+    (n_sim := 15) (completion_prefix := "theorem") : tactic (list declaration_with_docstring × list declaration_with_docstring) := do
   tactic.trace sformat!"Translating {stmt} to Lean code ...\n",
   translations ← tactic.unsafe_run_io $ get_translations stmt n_sim completion_prefix,
-  let translations' := translations.erase_dups,
-  (typecorrect_translations, failed_translations) ← translations'.split_with $ 
-      (functor.map option.is_some) ∘ tactic.try_core ∘ parse_thm_str,
-  let format_completion := λ completion : string, 
-      sformat! "/-- {stmt} -/ \n {completion_prefix}{completion}",
-  return (typecorrect_translations.map format_completion, failed_translations.map format_completion)
+  let translation_decls := translations.erase_dups.map $ λ t, declaration_with_docstring.from_string t stmt,
+  (typecorrect_translations, failed_translations) ← translation_decls.split_with $ 
+      (functor.map option.is_some) ∘ declaration_with_docstring.validate,
+  return (typecorrect_translations, failed_translations)

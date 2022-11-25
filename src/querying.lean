@@ -20,7 +20,9 @@ meta def get_openai_key : io string := do
 
 /-- Fetch the IP address of the `LeanAide` server. -/
 meta def lean_aide_ip : io string := do
-  some ip ← io.env.get "LEANAIDE_IP" | pure "localhost:5000",
+  -- the permanent IP is `34.100.184.111:5000`
+  -- this should be set as an environment variable 
+  some ip ← io.env.get "LEANAIDE_IP" | (do io.print_ln "Defaulting to local IP...", pure "localhost:5000"),
   return ip
 
 
