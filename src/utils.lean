@@ -30,8 +30,8 @@ def pop : string → string := λ s, s.mk_iterator.next.next_to_string
 def take_until_aux : (char → bool) → string → string → string × string
   | p ⟨c::cs⟩ acc :=
     let acc' := acc.push c in 
-      if p c then (⟨cs⟩, acc') else take_until_aux p ⟨cs⟩ acc'
-  | p ⟨[]⟩ acc := (⟨[]⟩, acc)
+      if p c then (acc', ⟨cs⟩) else take_until_aux p ⟨cs⟩ acc'
+  | p ⟨[]⟩ acc := (acc, ⟨[]⟩)
 
 def take_until : (char → bool) → string → string × string :=
   λ p s, take_until_aux p s ""
@@ -39,7 +39,7 @@ def take_until : (char → bool) → string → string × string :=
 def drop_while : (char → bool) → string → string
   | _ "" := ""
   | p ⟨c::cs⟩ :=
-      if p c then drop_while p ⟨cs⟩ else ⟨cs⟩
+      if p c then drop_while p ⟨cs⟩ else ⟨c::cs⟩
 
 end string
 
@@ -61,6 +61,8 @@ def process_args_core : string → string → nat → (string × string)
           n) in
       process_args_core ⟨cs⟩ (acc.push c) n'
     | ⟨[]⟩ acc n := (acc, ⟨[]⟩)
+
+def process_args := λ s, process_args_core s "" nat.zero
 
 namespace list
 

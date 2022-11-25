@@ -63,7 +63,20 @@ meta def from_json (j : json) : except string declaration_with_docstring := do
   -- TODO: Extract `is_definition` once `defdocs` is merged
   return ⟨ff, decl_name, args, type, doc_string⟩
 
--- this is going to be complicated
-def from_string (default_nm := "") (default_doc_str := "") : string → declaration_with_docstring := sorry
+/-- Parses a string of the form "<theorem/def> <name> <(arg₁) (arg₂) … (argₙ)> : <type>"
+    as a `declaration_with_docstring`. -/
+def from_string (decl : string) (doc_str := "") : declaration_with_docstring :=
+  let decl := decl.drop_while $ λ c, c.is_whitespace in
+  let (decl_head, named_term) := decl.take_until $ λ c, ¬c.is_alphanum in
+  let named_term := named_term.drop_while $ λ c, c.is_whitespace in
+  let (decl_name, args_with_type) := named_term.take_until $ λ c, ¬c.is_alphanum in
+  let (args, type) := process_args args_with_type in
+  { is_definition := decl_head = "def", 
+    decl_name := decl_name, 
+    args := args.drop_while $ λ c, c.is_whitespace, 
+    type := type, 
+    doc_string := doc_str }
+
+-- #eval declaration_with_docstring.args (from_string "theorem abc (n : ℕ) : n = n")
 
 end declaration_with_docstring
