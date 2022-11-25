@@ -14,10 +14,18 @@ meta def translate_help (_ : parse $ tk "translate?") : lean.parser unit := do
   let s := to_string stmt,
   trace sformat!"To start translating the sentence {s} into a Lean theorem," pure (),
   suggest_string $ "translate! " ++ s,
-  trace sformat!"To start translating the sentence {s} into a Lean theorem using Lean Chat prompts (not implemented)," pure (),
-  suggest_string $ "translate₀ " ++ s,
   trace sformat!"\nTo start translating the sentence {s} into a Lean definition (not implemented)," pure (),
-  suggest_string $ "translate/ " ++ s
+  suggest_string $ "translate_def! " ++ s
+
+meta def translate_core (use_fixed := tt) (n_sim := 15) (prompt_suffix := "theorem") : lean.parser unit := do
+  s ← lean.parser.pexpr,
+  let stmt := to_string s,
+  let stmt := stmt.pop_back.pop,
+  (typecorrect_translations, failed_translations) ← process_translations stmt use_fixed n_sim prompt_suffix,
+  tactic.trace "\nType-correct translations:\n",
+  suggest_strings $ typecorrect_translations.map declaration_with_docstring.to_full_string,
+  tactic.trace "Failed translations:\n",
+  suggest_strings $ failed_translations.map declaration_with_docstring.to_full_string
 
 /--!
 Translates a statement to Lean code automatically using OpenAI Codex.
@@ -25,18 +33,15 @@ Translates a statement to Lean code automatically using OpenAI Codex.
 This command is not meant to be used directly, but rather through the `translate?` command.
 -/
 @[user_command]
-meta def translate_cmd (_ : parse $ tk "translate!") : lean.parser unit := do
-  s ← lean.parser.pexpr,
-  let stmt := to_string s,
-  let stmt := stmt.pop_back.pop,
-  (typecorrect_translations, failed_translations) ← process_translations stmt,
-  tactic.trace "\nType-correct translations:\n",
-  suggest_strings $ typecorrect_translations.map declaration_with_docstring.to_full_string,
-  tactic.trace "Failed translations:\n",
-  suggest_strings $ failed_translations.map declaration_with_docstring.to_full_string
+meta def translate_cmd (_ : parse $ tk "translate!") : lean.parser unit :=
+  translate_core
+
+@[user_command]
+meta def translate_fixed_cmd (_ : parse $ tk "translate₀") : lean.parser unit :=
+  translate_core tt 0
 
 /--!
-A hole command that invokes the `translate` command to automatically translate mathematical statements to Lean code.
+A hole command that invokes the `translate!` command to automatically translate mathematical statements to Lean code.
 -/
 @[hole_command] meta def translate_hole_cmd : hole_command := {
   name := "translate",
@@ -44,5 +49,5 @@ A hole command that invokes the `translate` command to automatically translate m
   action := λ ps, do
     [p] ← return ps | tactic.fail "Infer command failed, the hole must contain a single term",
     let s := to_string p,
-    return [("translate " ++ s, "Translation of " ++ s), ("translate/ " ++ s, "Translation of " ++ s ++ " with docstring")]
+    return [("translate! " ++ s, "Translation of " ++ s)]
   }
