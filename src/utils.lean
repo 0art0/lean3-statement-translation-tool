@@ -29,8 +29,7 @@ def pop : string → string := λ s, s.mk_iterator.next.next_to_string
 
 def take_until_aux : (char → bool) → string → string → string × string
   | p ⟨c::cs⟩ acc :=
-    let acc' := acc.push c in 
-      if p c then (acc', ⟨cs⟩) else take_until_aux p ⟨cs⟩ acc'
+      if p c then (acc, ⟨c::cs⟩) else take_until_aux p ⟨cs⟩ (acc.push c)
   | p ⟨[]⟩ acc := (acc, ⟨[]⟩)
 
 def take_until : (char → bool) → string → string × string :=
