@@ -6,7 +6,7 @@ import system.io
     Clicking on the suggestion pastes it into the editor. -/
 meta def suggest_string {m : Type* → Type*} [monad m] 
     (s : string) (color : format.color := format.color.blue) : m unit :=
-  let f := to_fmt sformat!"Try this: {s}\n" in
+  let f := to_fmt sformat!"Try this: {s}" in
     pure $ _root_.trace_fmt (f.highlight color) (λ _, ())
 
 -- run_cmd suggest_string "hello world"
