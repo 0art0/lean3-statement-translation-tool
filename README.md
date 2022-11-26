@@ -27,21 +27,21 @@ export OPENAI_API_KEY=<your-open-ai-key>
 
 Clone this repository and open `src/experiments.lean` in VS Code or any other editor for Lean3. 
 
-To translate a statement - such as "Every natural number can be written as the sum of four squares" - to Lean code, first type
+To translate a statement to Lean code, first type
 
 ```lean
-translate? "Every natural number can be written as the sum of four squares"
+translate? "<the statement in natural language>"
 ```
 
-in the editor. A number of options highlighted in blue should appear in the infoview. Clicking on any of the options triggers a call to Codex and temporarily modifies the text in the editor. After a few seconds, a number of suggested translations should appear on the right. Clicking on a translation pastes it into the editor, replacing the text above.
+in the editor. A number of options for translation should appear in the infoview, highlighted in blue. Clicking on any of the options triggers a call to Codex and temporarily modifies the text in the editor. After a few seconds, a number of suggested translations should appear on the right. Clicking on a translation pastes it into the editor, replacing the text above.
 
 To add this as a dependency to your own repository, it should suffice to add
 
 ```lean
-lean3_statement_translation_tool = {git = "https://github.com/0art0/lean3_statement_translation_tool", rev = <the latest revision of the repository on GitHub>}
+lean3_statement_translation_tool = {git = "https://github.com/0art0/lean3-statement-translation-tool", rev = <the latest revision of the repository on GitHub>}
 ```
 
-to the `leanpkg.toml` file of your repository. Then any file importing `interface.lean` should be able to run the translation tool as demonstrated above.
+as a dependency to the `leanpkg.toml` file of your repository and build (with `leanproject build`). Then any file importing `interface.lean` should be able to run the translation tool as demonstrated above.
 
 The above instructions should work for a normal use. Details for configuring a local set-up of the server are described in the [`README` of the `LeanAide` repository](https://github.com/siddhartha-gadgil/LeanAide/blob/main/README.md).
 
