@@ -48,7 +48,7 @@ def to_string : declaration_with_docstring → string
         | ff := "theorem"
         | tt := "def"
       end) in
-    sformat!"{header} {nm} {args} : {type}"
+    sformat!"{header} {nm}{args}:{type}"
 
 /-- Displays a declaration and its docstring as a string. -/
 def to_full_string : declaration_with_docstring → string
