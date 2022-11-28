@@ -6,6 +6,8 @@ A tool for automatic formalisation of natural language theorem statements to `Le
 
 This is a part of [`LeanAide`](https://github.com/siddhartha-gadgil/LeanAide), which contains an autoformalisation tool using `Lean4`, among other things. A similar (but unrelated) tool also using OpenAI Codex for theorem statement autoformalisation is [`Lean Chat`](https://github.com/zhangir-azerbayev/lean-chat).
 
+![leanaide_demo](https://user-images.githubusercontent.com/18333981/204189939-dcbf639c-eefe-4e6e-bcdf-2912d641926f.gif)
+
 ## Details
 
 The tool works best on short and self-contained theorem statements, similar to the theorem doc-strings in `mathlib`. The translation is done using *input-dependent prompting*: when the user supplies a statement to be translated, related doc-strings from `mathlib` are automatically picked up and supplied to the Codex model in the form of a "prompt".
