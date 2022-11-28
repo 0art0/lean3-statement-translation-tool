@@ -6,6 +6,8 @@ A tool for automatic formalisation of natural language theorem statements to `Le
 
 This is a part of [`LeanAide`](https://github.com/siddhartha-gadgil/LeanAide), which contains an autoformalisation tool using `Lean4`, among other things. A similar (but unrelated) tool also using OpenAI Codex for theorem statement autoformalisation is [`Lean Chat`](https://github.com/zhangir-azerbayev/lean-chat).
 
+## Demonstration
+
 ![leanaide_demo](https://user-images.githubusercontent.com/18333981/204189939-dcbf639c-eefe-4e6e-bcdf-2912d641926f.gif)
 
 ## Details
