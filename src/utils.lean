@@ -42,9 +42,9 @@ def drop_while : (char → bool) → string → string
 
 end string
 
-def char.is_left_bracket := λ c, c ∈ ['(', '[', '{', '⦃']
+def char.is_left_bracket : char → bool := λ c, c ∈ ['(', '[', '{', '⦃']
 
-def char.is_right_bracket := λ c, c ∈ [')', ']', '}', '⦄']
+def char.is_right_bracket : char → bool := λ c, c ∈ [')', ']', '}', '⦄']
 
 /-- Attempts to process a string representing a type declaration, i.e., a 
   sequence of arguments followed by a type, separated by a colon. -/
