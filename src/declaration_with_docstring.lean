@@ -93,7 +93,7 @@ def from_string (decl : string) (doc_str := "") : declaration_with_docstring :=
   { is_definition := decl_head = "def", 
     decl_name := decl_name, 
     args := args.drop_while $ λ c, c.is_whitespace, 
-    type := type.drop_while $ λ c, c.is_whitespace, 
+    type := type, 
     doc_string := doc_str }
 
 -- #eval declaration_with_docstring.args (from_string "theorem abc (n : ℕ) : n = n")
