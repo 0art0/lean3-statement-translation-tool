@@ -42,6 +42,10 @@ def drop_while : (char → bool) → string → string
 
 end string
 
+def char.is_left_bracket := λ c, c ∈ ['(', '[', '{', '⦃']
+
+def char.is_right_bracket := λ c, c ∈ [')', ']', '}', '⦄']
+
 /-- Attempts to process a string representing a type declaration, i.e., a 
   sequence of arguments followed by a type, separated by a colon. -/
 def process_args_core : string → string → nat → (string × string)
@@ -52,9 +56,9 @@ def process_args_core : string → string → nat → (string × string)
     else
       -- the number of left brackets minus the number of right brackets
       let n' :=
-        (if c ∈ ['(', '[', '{', '⦃'] then
+        (if c.is_left_bracket then
           n.succ
-        else if c ∈ [')', ']', '}', '⦄'] then
+        else if c.is_right_bracket then
           n-1
         else
           n) in
