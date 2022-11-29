@@ -37,7 +37,7 @@ structure completion_request : Type :=
   (temperature : nat := 6) -- the actual temperature times `10`
   (n : nat := 7)
   (max_tokens : int := 150)
-  (stop : list string := [":=", "/-", "-/"])
+  (stop : list string := [":=", "/-", "-/", "\n\n"])
   
 instance completion_request.from_str : has_coe string completion_request :=
   { coe := λ s, {prompt := s} }
