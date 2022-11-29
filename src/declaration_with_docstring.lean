@@ -39,6 +39,26 @@ meta def validate : declaration_with_docstring → tactic (option unit)
                           sformat!"Π {args}, {type}" in
         parse_str full_type >>= λ _, pure ()
 
+/-- Convert a declaration to a `json` object. -/
+meta def to_json : declaration_with_docstring → json
+  | ⟨_, nm, args, type, _⟩ := 
+    json.object $ [
+      ("name", nm),
+      ("args", args),
+      ("type", type)
+    ]
+
+/-- Convert a declaration to a `json` object, including information such as the docstring. -/
+meta def to_full_json : declaration_with_docstring → json
+  | ⟨is_def, nm, args, type, doc_str⟩ := 
+    json.object $ [
+      ("is_def", json.of_bool is_def),
+      ("name", nm),
+      ("args", args),
+      ("type", type),
+      ("doc_string", doc_str)
+    ]
+
 /-- Displays a declaration as a string. -/
 def to_string : declaration_with_docstring → string
   | ⟨is_def, nm, args, type, _⟩ := 
