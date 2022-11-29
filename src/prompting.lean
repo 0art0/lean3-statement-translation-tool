@@ -4,7 +4,6 @@ import querying
 
 /-- A list of declarations from `mathlib` with docstrings similar to the given sentence. -/
 meta def similar_prompts (s : string) (n : nat) : io (list declaration_with_docstring) := do
-  io.print_ln "Fetching similar prompts from `mathlib` ...",
   sim_stmts ← get_similarity_prompts s n,
   sim_stmts.mmap $ λ j, io.of_except (declaration_with_docstring.from_json j)
 
@@ -17,23 +16,32 @@ def build_prompt (decls : list declaration_with_docstring) : string :=
   decls.foldr (λ d prompt, d.to_full_string ++ "\n\n" ++ prompt) string.empty
 
 /-- Produce Lean translations of a statement by querying Codex with a custom prompt -/
-meta def get_translations (stmt : string) (use_fixed := tt)
-    (n_sim := 15) (prompt_suffix := "theorem") : io (list string) := do
+meta def get_translations (stmt : string) 
+    (use_fixed := tt)
+    (n_sim := 15) 
+    (use_ctx := tt) 
+    (temp := 6) 
+    (n := 7) 
+    (prompt_suffix := "theorem") : io (list string) := do
   let fix_prompts := if use_fixed then fixed_prompts else [],
   sim_prompts ← similar_prompts stmt n_sim,
-  ctx_prompts ← context_prompts,
+  ctx_prompts ← if use_ctx then context_prompts else pure [],
   let all_prompts := sim_prompts ++ ctx_prompts,
   let main_prompt := (build_prompt all_prompts) ++ sformat!"/-- {stmt} -/\n" ++ prompt_suffix,
   -- io.print main_prompt,
   io.print_ln "Querying Codex ...",
-  translations ← completion_request.get_codex_completions main_prompt,
+  translations ← completion_request.get_codex_completions {prompt := main_prompt, temperature := temp, n := n},
   return $ translations.map (λ t, prompt_suffix ++ t)
 
 /-- Post-process the Codex completions by converting to `declaration_with_docstring` and typechecking. -/
 meta def process_translations (stmt : string)
-    (use_fixed := tt) (n_sim := 15) (completion_prefix := "theorem") : tactic (list declaration_with_docstring × list declaration_with_docstring) := do
-  tactic.trace sformat!"Translating {stmt} to Lean code ...\n",
-  translations ← tactic.unsafe_run_io $ get_translations stmt use_fixed n_sim completion_prefix,
+    (use_fixed := tt) 
+    (n_sim := 15) 
+    (use_ctx := tt) 
+    (temp := 6) 
+    (n := 7) 
+    (completion_prefix := "theorem") : tactic (list declaration_with_docstring × list declaration_with_docstring) := do
+  translations ← tactic.unsafe_run_io $ get_translations stmt use_fixed n_sim use_ctx temp n completion_prefix,
   let translation_decls := translations.erase_dups.map $ λ t, declaration_with_docstring.from_string t stmt,
   (typecorrect_translations, failed_translations) ← translation_decls.split_with $ 
       (functor.map option.is_some) ∘ declaration_with_docstring.validate,
