@@ -5,7 +5,8 @@ import querying
 /-- A list of declarations from `mathlib` with docstrings similar to the given sentence. -/
 meta def similar_prompts (s : string) (n : nat) : io (list declaration_with_docstring) := do
   sim_stmts ← get_similarity_prompts s n,
-  sim_stmts.mmap $ λ j, io.of_except (declaration_with_docstring.from_json j)
+  sim_prompts ← sim_stmts.mmap $ λ j, io.of_except (declaration_with_docstring.from_json j),
+  return sim_prompts.reverse
 
 /-- The declarations available in the context. -/
 meta def context_prompts : io (list declaration_with_docstring) := 
