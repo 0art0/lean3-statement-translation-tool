@@ -17,11 +17,18 @@ meta def translate_help (_ : parse $ tk "translate?") : lean.parser unit := do
   trace sformat!"\nTo start translating the sentence {s} into a Lean definition (not implemented)," pure (),
   suggest_string $ "translate_def! " ++ s
 
-meta def translate_core (use_fixed := tt) (n_sim := 15) (prompt_suffix := "theorem") : lean.parser unit := do
+meta def translate_core 
+  (use_fixed := tt) -- whether to use fixed prompts
+  (n_sim := 15) -- the number of prompts retrieved from `mathlib` by sentence similarity
+  (use_ctx := tt) -- whether to use declarations in the local context
+  (temp := 6) -- the temperature setting of Codex
+  (n := 7) -- the number of completions to fetch from Codex
+  (prompt_suffix := "theorem") -- prompts Codex to output a `theorem`/`def`/`structure` (works best for `theorem`)
+    : lean.parser unit := do
   s ← lean.parser.pexpr,
   let stmt := to_string s,
   let stmt := stmt.pop_back.pop,
-  (typecorrect_translations, failed_translations) ← process_translations stmt use_fixed n_sim prompt_suffix,
+  (typecorrect_translations, failed_translations) ← process_translations stmt use_fixed n_sim use_ctx temp n prompt_suffix,
   tactic.trace "\nType-correct translations:\n",
   suggest_strings $ typecorrect_translations.map declaration_with_docstring.to_full_string,
   tactic.trace "Failed translations:\n",
