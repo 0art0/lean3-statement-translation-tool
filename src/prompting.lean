@@ -28,8 +28,7 @@ meta def get_translations (stmt : string)
   ctx_prompts ← if use_ctx then context_prompts else pure [],
   let all_prompts := sim_prompts ++ ctx_prompts,
   let main_prompt := (build_prompt all_prompts) ++ sformat!"/-- {stmt} -/\n" ++ prompt_suffix,
-  -- io.print main_prompt,
-  io.print_ln "Querying Codex ...",
+  
   translations ← completion_request.get_codex_completions {prompt := main_prompt, temperature := temp, n := n},
   return $ translations.map (λ t, prompt_suffix ++ t)
 
