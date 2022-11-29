@@ -16,7 +16,7 @@ The tool works best on short and self-contained theorem statements, similar to t
 
 Codex outputs a few possible translations of the input statement, which are then checked for type-correctness. Lean is a dependently-typed language, so type-checking a translation provides a strong *filter* for correctness. Moreover, as Lean exposes its internals to the user, this part can be done programmatically and efficiently from within Lean. Note that for the filtering to work as intended, the relevant imports must already be present in the file.
 
-By default, we request `7` completions from Codex and retrieve `15` sentences from `mathlib` for input-dependent prompting. These parameters, and a few more such as temperature, can be adjusted [here](https://github.com/0art0/lean3-statement-translation-tool/blob/8a112eebc8d315b154c6fa647bf88edee67476a9/src/querying.lean#L34) and [here](https://github.com/0art0/lean3-statement-translation-tool/blob/8a112eebc8d315b154c6fa647bf88edee67476a9/src/interface.lean#L20).
+By default, we request `7` completions from Codex and retrieve `15` sentences from `mathlib` for input-dependent prompting. These parameters, and a few more such as temperature, can be adjusted [here](https://github.com/0art0/lean3-statement-translation-tool/blob/abc272a5f40f51f3923fe91b81a04ce7ab9ac5bc/src/interface.lean#L21).
 
 In [our experiments](https://mathai2022.github.io/papers/17.pdf), we found that Codex with these modifications is able to successfully translate short docstring-like statements at the undergraduate level more than half the time.
 
