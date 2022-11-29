@@ -88,12 +88,12 @@ def from_string (decl : string) (doc_str := "") : declaration_with_docstring :=
   let decl := decl.drop_while $ λ c, c.is_whitespace in
   let (decl_head, named_term) := decl.take_until $ λ c, (c.is_whitespace ∨ c = ',' ∨ c = ':' ∨ c = ';' ∨ c = '-') in
   let named_term := named_term.drop_while $ λ c, c.is_whitespace in
-  let (decl_name, args_with_type) := named_term.take_until $ λ c, (c.is_whitespace ∨ c = ',' ∨ c = ':' ∨ c = ';' ∨ c = '-') in
+  let (decl_name, args_with_type) := named_term.take_until $ λ c, (c.is_whitespace ∨ c = ',' ∨ c = ':' ∨ c = ';' ∨ c = '-' ∨ c.is_left_bracket) in
   let (args, type) := process_args args_with_type in
   { is_definition := decl_head = "def", 
     decl_name := decl_name, 
     args := args.drop_while $ λ c, c.is_whitespace, 
-    type := type, 
+    type := prod.fst $ type.take_until $ λ c, ¬c.is_whitespace, 
     doc_string := doc_str }
 
 -- #eval declaration_with_docstring.args (from_string "theorem abc (n : ℕ) : n = n")
