@@ -110,6 +110,10 @@ meta def lookup : json → string → except string json
       ("no key" ++ str)
   | _ _ := except.error "not an object"
 
+meta def as_object : json → except string (list (string × json))
+  | (json.object data) := except.ok data
+  | _ := except.error "not an object"
+
 meta def as_string : json → except string string
   | (json.of_string s) := except.ok s
   | _ := except.error "not a string"
@@ -117,6 +121,10 @@ meta def as_string : json → except string string
 meta def as_array : json → except string (list json)
   | (json.array xs) := except.ok xs
   | _ := except.error "not an array"
+
+meta def insert (data' : list (string × json)) : json → except string json
+  | (json.object data) := except.ok $ json.object (data ++ data')
+  | _ := except.error "not an object"
 
 meta def lookup_as {α} : json → string → (json → except string α) → except string α
   | j s φ := do
